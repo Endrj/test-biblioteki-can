@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <CAN_lib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,7 +62,15 @@ static void MX_TIM4_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int __io_putchar(int ch)
+{
+	if(ch == "\n")
+	{
+		__io_putchar('\r');
+	}
+	HAL_UART_Transmit(&huart2, &ch, (uint8_t)strlen(&ch), HAL_MAX_DELAY);
+	return 1;
+}
 /* USER CODE END 0 */
 
 /**
@@ -73,7 +81,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	CAN_lib.CAN_Konfiguracja_main();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -318,7 +326,9 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void TIM_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-
+	if(htim == &htim4){
+		CAN_lib.TIM();
+	}
 }
 /* USER CODE END 4 */
 
