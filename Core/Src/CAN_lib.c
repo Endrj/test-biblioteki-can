@@ -17,6 +17,8 @@
   */
 
 
+//void CAN_Konfiguracja_main()     //To powinno być wywołane w user code begin 2
+//void TIM()     //Wywołać w przerwaniu z timera // STM 80 MHz, Prescaker 799, CP 499.
 
 
 #include "main.h"
@@ -55,36 +57,7 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan);
 static void MX_CAN1_Init(void);
 
 
-
-void CAN_Konfiguracja_main(){
-	CAN_Filter_config();
-
-}
-
-
-// ustawienie filtra dla ID ramek CAN
-void CAN_Filter_Config(void)
-{
-	CAN_FilterTypeDef can1_filter_init;
-
-	can1_filter_init.FilterActivation = ENABLE;
-	can1_filter_init.FilterBank = 0;
-	can1_filter_init.FilterFIFOAssignment = CAN_RX_FIFO0;
-	can1_filter_init.FilterIdHigh = 0x0000;
-	can1_filter_init.FilterIdLow = 0x0000;
-	can1_filter_init.FilterMaskIdHigh = 0X0000;
-	can1_filter_init.FilterMaskIdLow = 0x0000;
-	can1_filter_init.FilterMode = CAN_FILTERMODE_IDMASK;
-	can1_filter_init.FilterScale = CAN_FILTERSCALE_32BIT;
-
-	if(HAL_CAN_ConfigFilter(&hcan1, &can1_filter_init) != HAL_OK)
-	{
-		Error_Handler();
-	}
-}
-
-//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
-void cantick(){
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	uint8_t rcvd_msg[8];
 	char msg[50];
@@ -182,25 +155,91 @@ void cantick(){
 			Error_Handler();
 		}
 	}
-
 }
 
-void CAN1_Tx_info(uint8_t info)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void CAN_Konfiguracja_main(){//To powinno być wywołane w user code begin 2
+	MX_CAN1_Init();
+
+	CAN_Filter_Config(); //
+		if(HAL_CAN_ActivateNotification(&hcan1,CAN_IT_TX_MAILBOX_EMPTY | CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_BUSOFF ) != HAL_OK)
+		{
+			Error_Handler();
+		}
+
+		//Start modułu CAN
+		if(HAL_CAN_Start(&hcan1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+}
+
+void TIM(){ //Wywołać w przerwaniu z timera // STM 80 MHz, Prescaker 799, CP 499.
+		CAN_TxHeaderTypeDef TxHeader;
+		uint32_t TxMailbox;
+		uint8_t message = 0xAB;
+
+		TxHeader.DLC	 = 8;
+		TxHeader.StdId	 = 0x2A3;
+		//TxHeader.StdId	 = 0x0A1;
+		TxHeader.IDE	 = CAN_ID_STD;
+		TxHeader.RTR	 = CAN_RTR_DATA;
+
+		if(HAL_CAN_AddTxMessage(&hcan1, &TxHeader, &message, &TxMailbox) != HAL_OK)
+		{
+			Error_Handler();
+		}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void CAN1_Tx_info(uint8_t info){
+		CAN_TxHeaderTypeDef TxHeader;
+		uint32_t TxMailbox;
+		uint8_t message = info;
+
+		TxHeader.DLC	 = 1;
+		TxHeader.StdId	 = 0x1A3;
+		TxHeader.IDE	 = CAN_ID_STD;
+		TxHeader.RTR	 = CAN_RTR_DATA;
+
+		if(HAL_CAN_AddTxMessage(&hcan1, &TxHeader, &message, &TxMailbox) != HAL_OK)
+		{
+			Error_Handler();
+		}
+}
+
+
+
+
+
+// ustawienie filtra dla ID ramek CAN
+void CAN_Filter_Config(void)
 {
-	CAN_TxHeaderTypeDef TxHeader;
-	uint32_t TxMailbox;
-	uint8_t message = info;
+	CAN_FilterTypeDef can1_filter_init;
 
-	TxHeader.DLC	 = 1;
-	TxHeader.StdId	 = 0x1A3;
-	TxHeader.IDE	 = CAN_ID_STD;
-	TxHeader.RTR	 = CAN_RTR_DATA;
+	can1_filter_init.FilterActivation = ENABLE;
+	can1_filter_init.FilterBank = 0;
+	can1_filter_init.FilterFIFOAssignment = CAN_RX_FIFO0;
+	can1_filter_init.FilterIdHigh = 0x0000;
+	can1_filter_init.FilterIdLow = 0x0000;
+	can1_filter_init.FilterMaskIdHigh = 0X0000;
+	can1_filter_init.FilterMaskIdLow = 0x0000;
+	can1_filter_init.FilterMode = CAN_FILTERMODE_IDMASK;
+	can1_filter_init.FilterScale = CAN_FILTERSCALE_32BIT;
 
-	if(HAL_CAN_AddTxMessage(&hcan1, &TxHeader, &message, &TxMailbox) != HAL_OK)
+	if(HAL_CAN_ConfigFilter(&hcan1, &can1_filter_init) != HAL_OK)
 	{
 		Error_Handler();
 	}
 }
+
+
+
+
 
 
 
@@ -225,7 +264,7 @@ void initialize_can(){
     Error_Handler();
   }
 }
-}
+
 
 void timfer_cadllbacck(){
 
@@ -249,27 +288,6 @@ void timfer_cadllbacck(){
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //co trzbeba raz przepuścic w ramach konfiguracji can ??????????????
 
-
-void konfiguracja()  //dać przed while
-{
-
-
-// \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
-  //konfiguracja filtrów i sprawdzenie poprawności modułu CAN
-	CAN_Filter_Config();
-	if(HAL_CAN_ActivateNotification(&hcan1,CAN_IT_TX_MAILBOX_EMPTY | CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_BUSOFF ) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	//Start modułu CAN
-	if(HAL_CAN_Start(&hcan1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-//====================================================================================================================================
-}
 
 
 

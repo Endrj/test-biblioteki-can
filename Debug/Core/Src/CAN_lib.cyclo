@@ -1,5 +1,7 @@
-../Core/Src/CAN_lib.c:59:6:CAN_Konfiguracja_main	1
-../Core/Src/CAN_lib.c:66:6:CAN_Filter_Config	2
-../Core/Src/CAN_lib.c:87:6:cantick	21
-../Core/Src/CAN_lib.c:230:6:timfer_cadllbacck	2
-../Core/Src/CAN_lib.c:253:6:konfiguracja	3
+../Core/Src/CAN_lib.c:60:6:HAL_CAN_RxFifo0MsgPendingCallback	21
+../Core/Src/CAN_lib.c:164:6:CAN_Konfiguracja_main	3
+../Core/Src/CAN_lib.c:180:6:TIM	2
+../Core/Src/CAN_lib.c:199:6:CAN1_Tx_info	2
+../Core/Src/CAN_lib.c:220:6:CAN_Filter_Config	2
+../Core/Src/CAN_lib.c:249:6:initialize_can	2
+../Core/Src/CAN_lib.c:269:6:timfer_cadllbacck	2
