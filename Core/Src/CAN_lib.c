@@ -57,7 +57,8 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan);
 static void MX_CAN1_Init(void);
 
 
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+void CAN_interrupt()
 {
 	uint8_t rcvd_msg[8];
 	char msg[50];
@@ -162,7 +163,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
 
 void CAN_Konfiguracja_main(){//To powinno być wywołane w user code begin 2
-	MX_CAN1_Init();
+	initialize_can();//MX_CAN1_Init();
+
 
 	CAN_Filter_Config(); //
 		if(HAL_CAN_ActivateNotification(&hcan1,CAN_IT_TX_MAILBOX_EMPTY | CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_BUSOFF ) != HAL_OK)

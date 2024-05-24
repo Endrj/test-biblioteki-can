@@ -30,3 +30,5 @@ void CAN1_Tx_info(uint8_t info);
 void CAN_Filter_Config(void);
 void initialize_can();
 void timfer_cadllbacck();
+
+#endif /*	CAN_lib_H_ 	*/
